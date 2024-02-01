@@ -1,11 +1,11 @@
 package com.example.springkotlinapi.controller
 
-import com.example.springkotlinapi.entity.book.Book
+import com.example.springkotlinapi.controller.dto.BookRequest
+import com.example.springkotlinapi.controller.dto.BookResponse
+import com.example.springkotlinapi.controller.dto.toBook
+import com.example.springkotlinapi.controller.dto.toBookResponse
 import com.example.springkotlinapi.service.BookService
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/book")
@@ -14,17 +14,21 @@ class BookController(
 ) {
 
     @PostMapping("/new") //testar sem o new pra ver
-    suspend fun save(@RequestBody book: Book): Book {
-        return bookService.save(book)
+    suspend fun save(@RequestBody book: BookRequest): BookResponse {
+        return bookService.save(book.toBook()).toBookResponse()
     }
 
-    @PostMapping("/find_all_book")
-    suspend fun findAllBooks(): List<Book> = bookService.findAllBooks()
+    @GetMapping("/all")
+    suspend fun findAllBooks(): List<BookResponse> = bookService.findAllBooks().map { it.toBookResponse() }
 
-    suspend fun findByTitle(tile: String): List<Book> = bookService.findByTitle(tile)
+    @GetMapping("/id/{id}")
+    suspend fun findById(@PathVariable id: Long): BookResponse = bookService.findById(id).toBookResponse()
 
-    suspend fun findById(id: Long): Book = bookService.findById(id)
-
+    @DeleteMapping
     suspend fun deleteById(id: Long) = bookService.deleteById(id)
 
+    @GetMapping("/title/{title}")
+    suspend fun findByTitle(@PathVariable title: String): List<BookResponse> = bookService.findByTitle(title).map { it.toBookResponse() }
+
+    //trazer por status
 }
